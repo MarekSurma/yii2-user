@@ -84,6 +84,9 @@ class Module extends BaseModule
     /** @var array Model map */
     public $modelMap = [];
 
+    public $loggedOutURL = '';
+    public $authorizedHomeUrl = '';
+
     /**
      * @var string The prefix for user module URL.
      *

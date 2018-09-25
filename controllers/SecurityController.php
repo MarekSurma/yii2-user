@@ -25,6 +25,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
+use yii;
 
 /**
  * Controller that manages user authentication process.
@@ -145,7 +146,7 @@ class SecurityController extends Controller
     public function actionLogin()
     {
         if (!\Yii::$app->user->isGuest) {
-            $this->goHome();
+            return $this->goHome();
         }
 
         /** @var LoginForm $model */
@@ -155,7 +156,6 @@ class SecurityController extends Controller
         $this->performAjaxValidation($model);
 
         $this->trigger(self::EVENT_BEFORE_LOGIN, $event);
-
         if ($model->load(\Yii::$app->getRequest()->post()) && $model->login()) {
             $this->trigger(self::EVENT_AFTER_LOGIN, $event);
             return $this->goBack();
@@ -165,6 +165,18 @@ class SecurityController extends Controller
             'model'  => $model,
             'module' => $this->module,
         ]);
+    }
+
+    public function goHome()
+    {
+        if (!\Yii::$app->user->isGuest && isset($this->module->authorizedHomeUrl)) {
+            return Yii::$app->getResponse()->redirect($this->module->authorizedHomeUrl);
+        }
+        if (\Yii::$app->user->isGuest && isset($this->module->loggedOutURL)) {
+            return Yii::$app->getResponse()->redirect($this->module->loggedOutURL);
+        }
+
+        return Yii::$app->getResponse()->redirect(Yii::$app->getHomeUrl());
     }
 
     /**
